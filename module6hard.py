@@ -6,7 +6,7 @@ class Figure:
     filled = bool
 
     def __init__(self, __color, *__sides):
-        self.__color = [*__color]
+        self.__color = __color if self.__is_valid_color(*__color) else [0, 0, 0]
         if len(__sides) == self.sides_count:
             self.__sides = [*__sides]
 
@@ -16,21 +16,19 @@ class Figure:
 
     @staticmethod
     def __is_valid_color(r, g, b):
-        if 0 <= (r or g or b) <= 255:
-            return True
-        else:
-            return False
+        return 0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255
 
     def set_color(self, r, g, b):
         if self.__is_valid_color(r, g, b):
             self.__color = [r, g, b]
 
     def __is_valid_sides(self, *args):
-        valid = True
+        if len(args) != self.sides_count:
+            return False
         for i in args:
-            if not isinstance(i, int) or len(args) != self.sides_count:
-                valid = False
-        return valid
+            if not isinstance(i, int) or i <= 0:
+                return False
+        return True
 
     # @property
     def get_sides(self):
@@ -51,7 +49,7 @@ class Circle(Figure):
         return round((self.get_sides()[0] / 6.28), 2)
 
     def get_square(self):
-        return round((3.14 * (self.__radius() * self.__radius())), 2)
+        return round(math.pi * (self.__radius() ** 2), 2)
 
 
 class Triangle(Figure):
@@ -67,13 +65,9 @@ class Triangle(Figure):
 class Cube(Figure):
     sides_count = 12
 
-    def __init__(self, __color, __sides: int):
-        super().__init__(__color)
-        self.__sides = [__sides] * self.sides_count
-
-    # @property
-    def get_sides(self):
-        return self.__sides
+    def __init__(self, color: list, *sides: int):
+        super().__init__(color, *sides)
+        self.set_sides(*list(sides) * 12)
 
     def get_volume(self):
         return self.get_sides()[0] ** 3
